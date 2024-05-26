@@ -14,41 +14,27 @@ class King < Piece
     end
 
     def pseudoLegalMoves(gameBoard)
+        ## Call the super-classes's implementation which checks all the "regular" straight line moves
+        pseudoLegalMovesSet = super()
 
-        pseudoMovesSet = Set.new()
+        ## Then, check castling and add if necessary
 
-        ## For each direction, use checkLine to gather in the pseudoLegalMoves
-
-        movementDir.each do |direction|
-            ## Check line will tell us the pseudo-legal moves in a single direction 
-            validMovesInDirection = checkLine(direction, @@kingUnit, gameBoard)
-            ## Add these pseudo-legal moves to our set
-            validMovesInDirection.each do |pseudoMove|
-                pseudoMovesSet.add(pseudoMove)
-
-            end
+        castlingPseudoLegal(gameBoard).each do |castlingMove|
+            pseudoLegalMovesSet.add(castlingMove)
         end
 
 
-        ## Then, check castling move if conditions for pseudo legal have been met, and add in as well
-        ## We only have to save two numbers: column of rook, column of other rook and same for both colors
-        ## We only have to check, taking this piece's position, and check [piece's row, rook column] and check
-        ## if the piece there is a rook, and also check if  the piece there is unmoved.
-        ## Probably, we should first check if king unmoved, then if piece there is a rook, and if its unmoved
-        ## then, do costlier check of checking space in between 
-
-
-
-
-        ## Finally, return our pseudoMoves
-
-        return pseduoMoveSet
-
+        ## Return the pseduoLegalMoves
+        return pseudoLegalMoves
 
     end
 
+    
+
 
     def castlingPseudoLegal(gameBoard)
+
+        pseudoLegalCastles = Array.new()
 
         ## The column value for both rooks (regardless if white or black)
         firstFileRookCol = 0
@@ -57,6 +43,7 @@ class King < Piece
         ## If the king has not moved, then castling is still valid. King is sitting on same row as rooks
         if(!kingHasMoved)
             kingRow = position[0]
+            kingCol = position[1]
 
             ## Obtain the piece at the position both kingside and queenside rook should be at
             firstPossibleRook  = gameBoard.pieceAt([kingRow, firstFileRookCol])
@@ -66,19 +53,74 @@ class King < Piece
             ## If the squares between king and rook are empty, and has not moved then castling is pseudo-legal
 
             if(!firstPossibleRook.isNil? && firstPossibleRook.is_a?(Rook) && !firstPossibleRook.rookHasMoved)
-                
+                if(spaceBetweenEmpty(firstPossibleRook.position, gameBoard))
+                    ## Castling towards rook on 1st file with 0 column index, so subtract from kings index
+                  pseudoLegalCastles.push([kingRow, kingCol - 2])
+
+
+                end
             end
+
+            ## Remember, the order of these checks matter, first we check if the obtained value at where the rook should
+            ## be is nil(i.e. no piece there). If there is a piece there, we should verify if its a rook, and then verify
+            ## if it has been moved. The order matters - for example if you try to check if it hasMoved, nil has no property
+            ## rookHasMoved
+
+            if(!secondPossibleRook.isNil? && secondPossibleRook.is_a?(Rook) && !secondPossibleRook.rookHasMoved)
+                if(spaceBetweenEmpty(secondPossibleRook.position, gameBoard))
+                    ## Castling towards rook on 8th file with 7 column index, so add to king's col
+                    pseudoLegalCastles.push([kingRow, kingCol + 2])
+                end
+            end
+
+            ## Return array of castling moves that are pseudo legal
+            return pseduoLegalCastles
 
 
         
         end
 
-        def spaceBetweenEmpty(kingPos, rookPos)
+       
 
 
 
 
     
+    end
+
+
+    ## Note that the method operates as follows: it does not care which color or which way your castling,
+    ## It simply determines the rook your looking to castle with's column, and then iterates from
+    ## the min(kingsCol, rooksCol) to max(kingsCol, rooksCol)
+    def spaceBetweenEmpty(rookPos, gameBoard)
+
+        ## Get col of both king and rook
+        kingCol = position[1]
+        rookCol = rookPos[1]
+
+        ## King's rank is same as rooks rank, sitting on same row since neither has moved
+        rank = position[0]
+
+        ## No need to worry about equals case, will never be equal as rook and kings column never same if both haven't moved
+        ## Here, we don't really know beforehand if the rook is to the right of the king or vice-versa, so we will figure out
+        ## Which one is to the left, and then iterate over columns from left  to right. 
+        max = kingCol > rookCol ? kingCol : rookCol
+        min = kingCol > rookCol ? rookCol: kingCol
+
+        ## Iterate over the columns between the king and the rook
+        for value in min..max
+            if(!gameBoard.isEmptySquare([rank, value]))
+                return false
+            end
+        
+        end
+
+        ## If we check every square and all of  them are empty
+
+        return true
+
+
+
     end
 
     def movementDir 
@@ -94,41 +136,7 @@ class King < Piece
         ]
     end
 
-    def checkLine(direction, unit, gameBoard)
-        movesFromLine = Array.new()
-        
-        directionX, directionY = direction
-
-        nextX = position[0]
-        nextY = position[1]
-
-        unit.times do
-            nextX = nextX + directionX
-            nextY = nextY + directionY
-            ## First check if this square is in bounds
-            if(gameBoard.inBounds([nextX, nextY]))
-                ## Next, obtain the piece (or nil) at the square. If theres no piece we can move there
-                if(gameBoard.isEmptySquare([nextX, nextY]))
-                    movesFromLine.push([nextX, nextY])
-                ## Else case is if the next square to be examined contains a piece. If the piece is an enemy, add it in
-                ## and we are done checking this line, if the piece is friendly (do nothing - aka dont add it in) and we are done
-                ## checking this line. 
-                else
-                    if(gameBoard.pieceColor([nextX, nextY]) != color)
-                        movesFromLine.push([nextX, nextY])
-                    end
-
-                    break
-                end
-            else
-                break
-        
-            end
-        end
-
-        return movesFromLine
-
-    end
+   
 
 
 end

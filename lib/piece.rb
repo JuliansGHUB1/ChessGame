@@ -9,6 +9,69 @@ class Piece
         @color = color
     end
 
+    def pseudoLegalMoves(gameBoard)
+
+        pseudoMovesSet = Set.new()
+
+        ## For each direction, use checkLine to gather in the pseudoLegalMoves
+
+        movementDir.each do |direction|
+            ## Check line will tell us the pseudo-legal moves in a single direction 
+            validMovesInDirection = checkLine(direction, @@kingUnit, gameBoard)
+            ## Add these pseudo-legal moves to our set
+            validMovesInDirection.each do |pseudoMove|
+                pseudoMovesSet.add(pseudoMove)
+
+            end
+        end
+
+
+
+
+        ## Finally, return our pseudoMoves
+
+        return pseduoMoveSet
+
+
+    end
+
+
+    def checkLine(direction, unit, gameBoard)
+        movesFromLine = Array.new()
+        
+        directionX, directionY = direction
+
+        nextX = position[0]
+        nextY = position[1]
+
+        unit.times do
+            nextX = nextX + directionX
+            nextY = nextY + directionY
+            ## First check if this square is in bounds
+            if(gameBoard.inBounds([nextX, nextY]))
+                ## Next, obtain the piece (or nil) at the square. If theres no piece we can move there
+                if(gameBoard.isEmptySquare([nextX, nextY]))
+                    movesFromLine.push([nextX, nextY])
+                ## Else case is if the next square to be examined contains a piece. If the piece is an enemy, add it in
+                ## and we are done checking this line, if the piece is friendly (do nothing - aka dont add it in) and we are done
+                ## checking this line. 
+                else
+                    if(gameBoard.pieceColor([nextX, nextY]) != color)
+                        movesFromLine.push([nextX, nextY])
+                    end
+
+                    break
+                end
+            else
+                break
+        
+            end
+        end
+
+        return movesFromLine
+
+    end
+
 
 
     ## Returns an array of all movement directions of this piece
