@@ -1,9 +1,26 @@
 class Piece
-    
+    attr_reader :position
+    attr_writer :position
+    attr_reader :color
+
     ## Constructor
     def initialize(position, color)
         @position = position
         @color = color
+    end
+
+
+
+    ## Returns an array of all movement directions of this piece
+    def movementDir 
+    
+    end
+
+
+    ## We will call this function in pseudo-legal moves. For each direction or way a piece can move
+    ## We will check along that line for as many units as that piece permits. 
+    def checkLine(direction, unit)
+
     end
 
     def pseudoLegalMoves(gameBoard)

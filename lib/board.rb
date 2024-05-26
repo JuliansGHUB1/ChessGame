@@ -1,11 +1,11 @@
 class Board
 
-	## Produces a function gameBoard which returns the value of gameBoard
-	attr reader :gameBoard
+	attr_reader :gameBoard
+	attr_writer :gameBoard
 
 	def self.createSetUpBoard
 		## Create an instance of the board
-		gB = new Board()
+		gB = Board.new()
 		## Instantiate various pieces, and place them onto the correct squares
 
 		## Return the set up board
@@ -30,7 +30,7 @@ class Board
 	## Method places piece at location
 	def placePiece(location, piece)
 		x,y = location
-		gameBoard[x,y] = piece
+		gameBoard[x][y] = piece
 	end
 
 	def isEmptySquare(location)
