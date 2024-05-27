@@ -1,5 +1,6 @@
 require_relative 'Piece'
 require 'set'
+require_relative 'Rook'
 class King < Piece
 
     ## Unit of movement for king
@@ -15,7 +16,11 @@ class King < Piece
 
     def pseudoLegalMoves(gameBoard)
         ## Call the super-classes's implementation which checks all the "regular" straight line moves
-        pseudoLegalMovesSet = super()
+        print "Calling the super classes implementation of pseduo legal moves\n"
+        
+        pseudoLegalMovesSet = super(gameBoard, @@kingUnit)
+
+        print "Is the returned set nil?: " + pseudoLegalMovesSet.nil?.to_s
 
         ## Then, check castling and add if necessary
 
@@ -25,7 +30,26 @@ class King < Piece
 
 
         ## Return the pseduoLegalMoves
-        return pseudoLegalMoves
+        return pseudoLegalMovesSet
+
+    end
+
+
+    def legalMove(destLoc, gameBoard)
+        
+
+    end
+
+    ## Overriden from superclass, special case where if it is a castling move we must check two boards
+    def causesCheck(destLoc, gameBoard)
+        ## If a pseudo legal move of the king moves more than a square along the x-axis, the pseudo legal move in question is castling
+        isCastlingMove = (destLoc[x] - position[x]).abs > 1
+
+        if(isCastlingMove)
+            ## Check two boards
+        else
+            ## Check one board
+        end
 
     end
 
@@ -52,7 +76,8 @@ class King < Piece
             ## Check if these pieces are rooks, and if they are, check if 1) rook has moved and 2) the squares in between king and rook are empty.
             ## If the squares between king and rook are empty, and has not moved then castling is pseudo-legal
 
-            if(!firstPossibleRook.isNil? && firstPossibleRook.is_a?(Rook) && !firstPossibleRook.rookHasMoved)
+            print ("\n\nis the condition true " + (!secondPossibleRook.nil? && secondPossibleRook.is_a?(Rook) && !secondPossibleRook.rookHasMoved).to_s)
+            if(!firstPossibleRook.nil? && firstPossibleRook.is_a?(Rook) && !firstPossibleRook.rookHasMoved)
                 if(spaceBetweenEmpty(firstPossibleRook.position, gameBoard))
                     ## Castling towards rook on 1st file with 0 column index, so subtract from kings index
                   pseudoLegalCastles.push([kingRow, kingCol - 2])
@@ -66,15 +91,20 @@ class King < Piece
             ## if it has been moved. The order matters - for example if you try to check if it hasMoved, nil has no property
             ## rookHasMoved
 
-            if(!secondPossibleRook.isNil? && secondPossibleRook.is_a?(Rook) && !secondPossibleRook.rookHasMoved)
+            if(!secondPossibleRook.nil? && secondPossibleRook.is_a?(Rook) && !secondPossibleRook.rookHasMoved)
                 if(spaceBetweenEmpty(secondPossibleRook.position, gameBoard))
                     ## Castling towards rook on 8th file with 7 column index, so add to king's col
                     pseudoLegalCastles.push([kingRow, kingCol + 2])
                 end
             end
-
+            
+            print("\n Printing pseudo legal castles\n")
+            pseudoLegalCastles.each do |move|
+                print (move[0].to_s + " " + move[1].to_s + "\n")
+            end
+            print "\n"
             ## Return array of castling moves that are pseudo legal
-            return pseduoLegalCastles
+            return pseudoLegalCastles
 
 
         
@@ -107,15 +137,24 @@ class King < Piece
         max = kingCol > rookCol ? kingCol : rookCol
         min = kingCol > rookCol ? rookCol: kingCol
 
+        ## Whatever piece is at the min location, start looking at one to right till one to left of the piece at max
+        ## (all spaces between, but not including, the rook and king)
+        min = min + 1
+        max = max - 1
+
+        print (min.to_s + " " + max.to_s)
         ## Iterate over the columns between the king and the rook
         for value in min..max
             if(!gameBoard.isEmptySquare([rank, value]))
+                puts "rank and value: " + rank.to_s + " " + value.to_s
                 return false
             end
         
         end
 
         ## If we check every square and all of  them are empty
+
+        puts "reached the end, spaces are all empty"
 
         return true
 

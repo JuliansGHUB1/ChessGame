@@ -5,19 +5,25 @@ class Piece
 
     ## Constructor
     def initialize(position, color)
+        print "called constructor\n"
         @position = position
         @color = color
     end
 
-    def pseudoLegalMoves(gameBoard)
+    def pseudoLegalMoves(gameBoard, unit)
+
+        print "OUR METHOD IS BEING CALLED\n"
 
         pseudoMovesSet = Set.new()
 
         ## For each direction, use checkLine to gather in the pseudoLegalMoves
 
+        
+
         movementDir.each do |direction|
+            print ("curr dir: " + direction[0].to_s + direction[1].to_s)
             ## Check line will tell us the pseudo-legal moves in a single direction 
-            validMovesInDirection = checkLine(direction, @@kingUnit, gameBoard)
+            validMovesInDirection = checkLine(direction, unit, gameBoard)
             ## Add these pseudo-legal moves to our set
             validMovesInDirection.each do |pseudoMove|
                 pseudoMovesSet.add(pseudoMove)
@@ -30,7 +36,7 @@ class Piece
 
         ## Finally, return our pseudoMoves
 
-        return pseduoMoveSet
+        return pseudoMovesSet
 
 
     end
@@ -80,31 +86,31 @@ class Piece
     end
 
 
-    ## We will call this function in pseudo-legal moves. For each direction or way a piece can move
-    ## We will check along that line for as many units as that piece permits. 
-    def checkLine(direction, unit)
-
-    end
-
-    def pseudoLegalMoves(gameBoard)
-        ## Use our position and the gameBoard to determine the pseudo legal moves of this piece
-        ## Return a hashmap of these moves. 
-
-    end
-
+  
+    ## Needs to be implemented...
     def causesCheck(destLoc, gameBoard)
         ## Produce a board in which the piece is moved to destLoc. Check, using the functionality provided by the board class (some non-static function)
         ## to see if this board instance is producing a check 
+        return false
     end
 
     ## A function that given a move will check if its pseudo-legal, and then check if its valid (does not play into check)
     def legalMove(destLoc, gameBoard)
         ## Check if this move is an element of the pseudolegal moves
+        if(pseudoLegalMoves.include?(destLoc))
+             ## Then, check if this move does not put us in check
+             if(!causesCheck(destLoc, gameBoard))
+                return true
+             end
 
-        ## Then, check if this move does not put us in check
+             ## If either of the conditions is false (not a pseudo legal, or causes a check) then this is not a valid move
+            return false
+        end
+
+       
 
 
-        ## If both of the above conditions are satisfied, return true.
+        
     end
 
 

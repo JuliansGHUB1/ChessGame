@@ -1,19 +1,34 @@
 require_relative 'lib/board'
 require_relative 'lib/king'
+require_relative 'lib/rook'
 
 ## Test,  lets make a board. Then, we will make a king, and try  to see how it moves up the board.
 
 b = Board.new()
 
-k = King.new([0,0], :black)
+k = King.new([0,5], :Black)
 
-k1 = King.new([6,0], :White)
+b.placePiece([0,5], k)
 
-b.placePiece([5,5], k1)
+r = Rook.new([0,7], :Black)
 
-arr = k.checkLine([1, 1], 8, b)
+r1 = Rook.new([0,0], :Black)
 
-arr.each do |position|
-    puts position[0].to_s + " " + position[1].to_s
+b.placePiece([0,7], r)
+
+b.placePiece([0,0], r1)
+
+
+iterable = k.pseudoLegalMoves(b)
+
+
+print("\n print the valid moves \n")
+iterable.each do |sudo|
+    print sudo[0].to_s + " " + sudo[1].to_s + "\n"
 end
+
+
+
+
+
 
