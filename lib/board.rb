@@ -12,20 +12,17 @@ class Board
 		return gB
 	end
 
-	## Checks if the board is currently in a check
-	## Check in all directional patterns from the king (i.e. vertical, horinzontally, diagonally, and also L shaped)
-	## Look across all patterns infinitely until you hit A) a friendly piece B) an enemy piece (at which point you must verify it is not giving check)
-	## or C) until you fall off the board. The edge case here is horses, do not check L shaped infinitely, just a unit of 1. 
-	def isCheck()
-
-
-	end
 
 	def initialize
 
 		## This is ruby syntax: for each of the 8 slots made in the new array, that slot will be filled
 		## with the result of what is in the "block". So each slot will be filled with an array of 8 elements (aka 8 x 8 array)
 		@gameBoard = Array.new(8) {Array.new(8, nil)}
+
+		## Board should maintain a reference to both kings, so we can get its position for checking if a player is in check
+		@blackKing = nil;
+
+		@whiteKing = nil;
 	
 	end
 

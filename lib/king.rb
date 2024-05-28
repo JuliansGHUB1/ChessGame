@@ -14,6 +14,156 @@ class King < Piece
         @kingHasMoved = false
     end
 
+    ## Checks if the board is currently in a check
+	## Check in all directional patterns from the king (i.e. vertical, horinzontally, diagonally, and also L shaped)
+	## Look across all patterns infinitely until you hit A) a friendly piece B) an enemy piece (at which point you must verify it is not giving check)
+	## or C) until you fall off the board. The edge case here is horses, do not check L shaped infinitely, just a unit of 1. 
+	def isCheck(gameBoard)
+		## Iterate over all directions from the king
+        movementDir.each do |direction|
+            possibleAttackingPiece = enemyPieceOnLine(direction, gameBoard)
+            if(possibleAttackingPiece != nil)
+                
+                if(possibleAttackingPiece.is_a(Knight))
+                ## Horses can't attack from any of the king's movement dirs (horizontal, vertically, diagonally)
+                next
+                
+                elsif(possibleAttackingPiece.is_a(King))
+                ## Here, we can quickly just check if the x difference and y difference are both at most 1 away
+                enemyX,enemyY = possibleAttackingPiece.position
+                currX, currY = position
+
+                xDist = (currX - enemyX).abs
+                yDist = (currY - enemyY).abs
+
+                    ## We have found a check, so no need to look further
+                    if(xDist <=1 && yDist <= 1)
+                        return true
+
+                    end
+
+
+
+                elsif(possibleAttackPiece.is_a(Pawn))  
+                    ## Here, we can just rapidly check if we are diagonally forward to thsi pawn
+                    directionArr = Pawn.movementDir
+                    ## Either each move it adds +1 to its x or -1 to its x
+                    forwardVector = directionArr[0]
+
+                    ## Get the diagonal squares of the pawn
+                    pawnPos = pawn.position
+
+                    pawnX,pawnY = pawnPos
+
+                    ## If pawn is advancing in a way that +1 to row each time, then, the diagonal square it attacks
+                    ## have the row current row + 1. If the pawn is advancing in a way that  - 1 to its row each time,
+                    ## then, the diagonal square it attacks have row current row - 1. Of course, the column of the squares
+                    ## the pawn attacks are simply to the left and right of the current column
+                    diagonal1 = [pawnX + forwardVector, pawnY + 1]
+                    diagonal2 = [pawnx + forwardVector, pawny - 1]
+
+                    ## If the king's position is the same as the squares this pawn is attacking, then we are in check
+                    if(position == diagonal1 || position == diagonal2)
+                        return true
+                    end
+                
+                
+                ## Handles all sliding pieces - there is a direct line to enemy rook,queen,bishop
+                else
+                    ## Invert the direction
+                    dirFromEnemyPerspective = [direction[0] * -1, direction[1] * -1]
+
+                    ## Check if this is an element of the piece's movementDir (i.e. can the piece move down this line towards the king)
+                    possibleAttackingPiece.movementDir.include?(dirFromEnemyPerspective)
+                    ## At this point you know the pieces can (1) see eachother accross this line (2) The other piece can slide accross the line (this else case only contains sliding pieces), so we are in check
+                    return true
+
+
+                end
+
+
+            end
+
+        end
+
+        ## Now, since the ways horses attack lay outside of the 8 directions into the king, we will check those separately.
+        ## (I.e. checking horzitonal, vertical, and diagonals to the king do not include the places horses can check from)
+        horseAttacks = [
+            [2,1],
+            [1,2],
+            [1,-2],
+            [2,-1],
+            [-1, -2],
+            [-1, 2],
+            [-2, -1],
+            [-2, 1]
+        ]
+
+        horseAttacks.each do |attack|
+            ## Add the vector to kings current position and see if theres a enemy horse there
+            containsHorse = [position[0] + attack[0], position[1] + attack[1]]
+            ## First verify that this square is valid so we don't index out of bounds, and then check if theres a piece there
+            if(gameBoard.inBounds(containsHorse) && gameBoard.pieceAt(containsHorse) != nil)
+                ## Now, check if theres a enemy horse. If there is, we are in check
+                if(gameBoard.pieceAt(containsHorse).is_a(Knight) && gameBoard.pieceAt(containsHorse).color != color)
+                    return true
+
+                end
+
+            end
+        end
+
+
+
+        ## If none of those checks yield that we are in check, then we are not in check
+
+        return false
+
+
+
+	end
+
+    ## Return the piece 
+    def enemyPieceOnLine(direction, gameBoard)
+        movesFromLine = Array.new()
+        
+        directionX, directionY = direction
+
+        nextX = position[0]
+        nextY = position[1]
+
+        7.times do
+            nextX = nextX + directionX
+            nextY = nextY + directionY
+            ## First check if this square is in bounds
+            if(gameBoard.inBounds([nextX, nextY]))
+                ## Next, obtain the piece (or nil) at the square. If theres no piece, we will keep looking along line
+                if(gameBoard.isEmptySquare([nextX, nextY]))
+                    next
+                ## Else case is if the next square to be examined contains a piece. If the piece is an enemy, then we have
+                ## encountered the first enemy piece on the line, so return it. If the piece is friendly, just return because
+                ## there is no check along this line, as the first piece encountered is friendly. 
+                else
+                    if(gameBoard.pieceColor([nextX, nextY]) != color)
+                        return gameBoard.pieceAt([nextX, nextY])
+                    else
+                        return nil
+                    end
+                    
+                end
+            else
+                ## If we hit an out of bounds, we will break out of the loop, because we have checked accross the line and couldn't find a piece
+                ## so, we will break out of the loop and return nil, as there is no pieces on this line 
+                break
+        
+            end
+        end
+
+        return nil
+    
+
+    end
+
     def pseudoLegalMoves(gameBoard)
         ## Call the super-classes's implementation which checks all the "regular" straight line moves
         print "Calling the super classes implementation of pseduo legal moves\n"

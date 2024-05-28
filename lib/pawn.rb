@@ -1,12 +1,18 @@
 class Pawn < Piece
-    def initialize
-       
+    def initialize(position, color)
+       super(position, color)
     end
 
-    def movementdirections
-        movementArr = Array.new()
+    def movementDir
 
-        if()
+        if(color == "White")
+            movementDirections = [1, 0]
+            return movementDirections
+        else
+            movementDirections = [-1, 0]
+            return movementDirections
+        end
+
     end
 
     def calculateValidMoves(gameBoard)
