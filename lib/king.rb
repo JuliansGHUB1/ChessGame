@@ -1,6 +1,8 @@
 require_relative 'Piece'
 require 'set'
 require_relative 'Rook'
+require_relative 'Pawn'
+require_relative 'Knight'
 class King < Piece
 
     ## Unit of movement for king
@@ -10,7 +12,13 @@ class King < Piece
     attr_reader :kingHasMoved
 
     def initialize(position, color)
-        super(position, color)
+        if(color == :White)
+            image = "♔"
+        else
+            image = "♚"
+        end
+        
+        super(position, color, image)
         @kingHasMoved = false
     end
 
@@ -24,11 +32,11 @@ class King < Piece
             possibleAttackingPiece = enemyPieceOnLine(direction, gameBoard)
             if(possibleAttackingPiece != nil)
                 
-                if(possibleAttackingPiece.is_a(Knight))
+                if(possibleAttackingPiece.is_a?(Knight))
                 ## Horses can't attack from any of the king's movement dirs (horizontal, vertically, diagonally)
                 next
                 
-                elsif(possibleAttackingPiece.is_a(King))
+                elsif(possibleAttackingPiece.is_a?(King))
                 ## Here, we can quickly just check if the x difference and y difference are both at most 1 away
                 enemyX,enemyY = possibleAttackingPiece.position
                 currX, currY = position
@@ -44,14 +52,15 @@ class King < Piece
 
 
 
-                elsif(possibleAttackPiece.is_a(Pawn))  
+                elsif(possibleAttackingPiece.is_a?(Pawn))  
+                    ## Note, of course, if enemyPieceOnLine returns this piece, it is an enemy piece by nature
                     ## Here, we can just rapidly check if we are diagonally forward to thsi pawn
-                    directionArr = Pawn.movementDir
+                    directionArr = possibleAttackingPiece.movementDir
                     ## Either each move it adds +1 to its x or -1 to its x
                     forwardVector = directionArr[0]
 
                     ## Get the diagonal squares of the pawn
-                    pawnPos = pawn.position
+                    pawnPos = possibleAttackingPiece.position
 
                     pawnX,pawnY = pawnPos
 
@@ -60,7 +69,10 @@ class King < Piece
                     ## then, the diagonal square it attacks have row current row - 1. Of course, the column of the squares
                     ## the pawn attacks are simply to the left and right of the current column
                     diagonal1 = [pawnX + forwardVector, pawnY + 1]
-                    diagonal2 = [pawnx + forwardVector, pawny - 1]
+                    diagonal2 = [pawnX + forwardVector, pawnY - 1]
+
+                    print "\n"
+
 
                     ## If the king's position is the same as the squares this pawn is attacking, then we are in check
                     if(position == diagonal1 || position == diagonal2)

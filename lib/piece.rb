@@ -2,12 +2,14 @@ class Piece
     attr_reader :position
     attr_writer :position
     attr_reader :color
+    attr_reader :image
 
     ## Constructor
-    def initialize(position, color)
+    def initialize(position, color, image)
         print "called constructor\n"
         @position = position
         @color = color
+        @image = image
     end
 
     def pseudoLegalMoves(gameBoard, unit)

@@ -1,11 +1,17 @@
 class Pawn < Piece
     def initialize(position, color)
-       super(position, color)
+        if(color == :White)
+            image = "♙"
+        else
+            image = "♟"
+        end
+
+       super(position, color, image)
     end
 
     def movementDir
 
-        if(color == "White")
+        if(color == :White)
             movementDirections = [1, 0]
             return movementDirections
         else
